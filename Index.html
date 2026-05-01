@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cuentas Nico&Cris</title>
+  <style>
+    :root {
+      --primary: #000000;
+      --secondary: #f2f2f7;
+      --accent: #007aff;
+      --success: #34c759;
+      --danger: #ff3b30;
+      --bg: #f8f9fa;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
+    body { background-color: var(--bg); color: #1c1c1e; padding: 15px; }
+
+    .app-container { max-width: 500px; margin: 0 auto; background: white; border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); min-height: 95vh; display: flex; flex-direction: column; }
+    
+    header { margin-bottom: 25px; }
+    header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    
+    /* Selector de Mes Estilizado */
+    .month-picker-container { display: flex; align-items: center; gap: 8px; }
+    .month-select { border: none; background: var(--secondary); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; outline: none; }
+
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+    .stat-card { padding: 16px; border-radius: var(--radius); background: var(--secondary); }
+    .stat-card span { display: block; font-size: 11px; font-weight: 600; color: #8e8e93; text-transform: uppercase; margin-bottom: 4px; }
+    .stat-card div { font-size: 19px; font-weight: 700; }
+
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #eee; overflow-x: auto; }
+    .nav-tab { border: none; background: none; padding: 10px; font-size: 14px; font-weight: 500; color: #8e8e93; cursor: pointer; white-space: nowrap; }
+    .nav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .list-container { flex-grow: 1; }
+    .movement-item { padding: 14px 0; border-bottom: 1px solid #f2f2f7; }
+    .m-main { display: flex; justify-content: space-between; align-items: center; }
+    .m-name { font-weight: 600; font-size: 15px; }
+    .m-amount { font-weight: 700; font-size: 15px; }
+    .m-detail { font-size: 11px; color: #8e8e93; margin-top: 4px; display: block; line-height: 1.4; }
+
+    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 18px; border-radius: var(--radius); font-size: 16px; font-weight: 700; margin-top: 20px; cursor: pointer; }
+
+    /* Modal y Formularios Dinámicos */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: white; width: 92%; max-width: 420px; border-radius: 24px; padding: 24px; max-height: 90vh; overflow-y: auto; }
+    
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; font-size: 12px; font-weight: 600; color: #8e8e93; margin-bottom: 6px; }
+    .input-group select, .input-group input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e5e7; background: var(--secondary); font-size: 15px; }
+    
+    .sub-panel { background: #f9f9fb; padding: 15px; border-radius: 12px; border: 1px dashed #d2d2d7; margin-top: 10px; display: none; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+    .btn-cancel { padding: 14px; border: none; border-radius: 12px; font-weight: 600; background: #f2f2f7; cursor: pointer; }
+    .btn-save { padding: 14px; border: none; border-radius: 12px; font-weight: 600; background: var(--primary); color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>Cuentas Nico&Cris</h1>
+      <div class="month-picker-container">
+        <select id="month-selector" class="month-select" onchange="render()"></select>
+      </div>
+    </header>
+
+    <div class="summary-grid" id="summary"></div>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('all', this)">Todos</button>
+      <button class="nav-tab" onclick="switchTab('pago', this)">Pagos</button>
+      <button class="nav-tab" onclick="switchTab('ingreso', this)">Ingresos</button>
+    </nav>
+
+    <div class="list-container" id="movement-list"></div>
+
+    <button class="btn-add" onclick="toggleModal(true)">+ Nuevo Movimiento</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-content">
+      <h2 style="margin-bottom:20px; text-align:center;">Nuevo Registro</h2>
+      
+      <div class="input-group">
+        <label>Categoría</label>
+        <select id="main-category" onchange="handleCategoryChange(this.value)">
+          <option value="Sueldo">💰 Sueldo</option>
+          <option value="Arriendo">🏠 Arriendo</option>
+          <option value="Supermercado">🛒 Supermercado</option>
+          <option value="Cuentas">💡 Cuentas (Agua, Luz, Gas)</option>
+          <option value="Gasto Hormiga">🐜 Gasto Hormiga</option>
+          <option value="Otro">➕ Otro...</option>
+        </select>
+      </div>
+
+      <!-- Panel Supermercado -->
+      <div id="panel-super" class="sub-panel">
+        <div class="input-group"><label>Producto</label><input type="text" id="sp-prod" placeholder="Ej: Arroz"></div>
+        <div class="grid-2">
+          <div class="input-group"><label>Cant.</label><input type="number" id="sp-cant" value="1"></div>
+          <div class="input-group"><label>Lugar</label><input type="text" id="sp-lugar" placeholder="Ej: Lider"></div>
+        </div>
+      </div>
+
+      <!-- Panel Cuentas -->
+      <div id="panel-cuentas" class="sub-panel">
+        <div class="input-group">
+          <label>Tipo de Cuenta</label>
+          <select id="ct-tipo">
+            <option value="Agua">💧 Agua</option>
+            <option value="Electricidad">⚡ Electricidad</option>
+            <option value="Gas">🔥 Gas</option>
+            <option value="Internet">🌐 Internet</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Panel Gasto Hormiga / Otro -->
+      <div id="panel-otro" class="sub-panel" style="display:block;">
+        <div class="input-group"><label>¿Qué fue?</label><input type="text" id="ot-desc" placeholder="Ej: Café, Estacionamiento"></div>
+      </div>
+
+      <div class="input-group" style="margin-top:15px;">
+        <label>Monto Total ($)</label>
+        <input type="number" id="main-amount" placeholder="0" inputmode="numeric">
+      </div>
+
+      <div class="input-group">
+        <label>Tipo</label>
+        <select id="main-type">
+          <option value="pago">Gasto (-)</option>
+          <option value="ingreso">Ingreso (+)</option>
+        </select>
+      </div>
+
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
+        <button class="btn-save" onclick="handleSave()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let movements = JSON.parse(localStorage.getItem('cuentas_v4')) || [];
+    let currentTab = 'all';
+
+    function init() {
+      const selector = document.getElementById('month-selector');
+      const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      const ahora = new Date();
+      
+      for(let i = -6; i <= 6; i++) {
+        let d = new Date(ahora.getFullYear(), ahora.getMonth() + i, 1);
+        let label = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+        let opt = new Array(label, label);
+        let el = document.createElement("option");
+        el.textContent = label;
+        el.value = label;
+        if(i === 0) el.selected = true;
+        selector.appendChild(el);
+      }
+      render();
+    }
+
+    function handleCategoryChange(val) {
+      document.getElementById('panel-super').style.display = (val === 'Supermercado') ? 'block' : 'none';
+      document.getElementById('panel-cuentas').style.display = (val === 'Cuentas') ? 'block' : 'none';
+      document.getElementById('panel-otro').style.display = (val === 'Otro' || val === 'Gasto Hormiga' || val === 'Sueldo' || val === 'Arriendo') ? 'block' : 'none';
+      
+      // Pre-configurar tipo
+      document.getElementById('main-type').value = (val === 'Sueldo') ? 'ingreso' : 'pago';
+    }
+
+    function toggleModal(show) {
+      document.getElementById('modal-overlay').classList.toggle('active', show);
+      if(!show) {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        handleCategoryChange('Sueldo');
+      }
+    }
+
+    function handleSave() {
+      const cat = document.getElementById('main-category').value;
+      const amount = document.getElementById('main-amount').value;
+      const type = document.getElementById('main-type').value;
+      const month = document.getElementById('month-selector').value;
+
+      let finalDesc = cat;
+      let detail = "";
+
+      if(cat === 'Supermercado') {
+        const prod = document.getElementById('sp-prod').value;
+        const cant = document.getElementById('sp-cant').value;
+        const lugar = document.getElementById('sp-lugar').value;
+        finalDesc = `Super: ${prod}`;
+        detail = `${cant} unid. en ${lugar}`;
+      } else if(cat === 'Cuentas') {
+        finalDesc = `Cuenta: ${document.getElementById('ct-tipo').value}`;
+      } else {
+        finalDesc = document.getElementById('ot-desc').value || cat;
+      }
+
+      if(!amount) return alert("Ingresa el monto");
+
+      movements.unshift({
+        id: Date.now(),
+        description: finalDesc,
+        detail: detail,
+        amount: Number(amount),
+        type: type,
+        category: cat,
+        month: month,
+        date: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'})
+      });
+
+      localStorage.setItem('cuentas_v4', JSON.stringify(movements));
+      toggleModal(false);
+      render();
+    }
+
+    function render() {
+      const selectedMonth = document.getElementById('month-selector').value;
+      const filteredMovements = movements.filter(m => m.month === selectedMonth);
+      
+      const totalIng = filteredMovements.filter(m => m.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
+      const totalGas = filteredMovements.filter(m => m.type === 'pago').reduce((a, b) => a + b.amount, 0);
+
+      document.getElementById('summary').innerHTML = `
+        <div class="stat-card"><span>Disponible</span><div style="color:var(--accent)">$${(totalIng - totalGas).toLocaleString('es-CL')}</div></div>
+        <div class="stat-card"><span>Gastos</span><div style="color:var(--danger)">$${totalGas.toLocaleString('es-CL')}</div></div>
+      `;
+
+      const list = document.getElementById('movement-list');
+      let displayList = filteredMovements;
+      if(currentTab !== 'all') displayList = filteredMovements.filter(m => m.type === currentTab);
+
+      if(displayList.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:40px; color:#aeaeb2; font-size:14px;">No hay datos para ${selectedMonth}</div>`;
+        return;
+      }
+
+      list.innerHTML = displayList.map(m => `
+        <div class="movement-item">
+          <div class="m-main">
+            <span class="m-name">${m.description}</span>
+            <span class="m-amount" style="color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
+              ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
+            </span>
+          </div>
+          ${m.detail ? `<span class="m-detail">${m.detail}</span>` : ''}
+          <span class="m-detail">${m.date}</span>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(tab, el) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
