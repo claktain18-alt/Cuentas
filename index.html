@@ -20,9 +20,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
     
     body { background-color: var(--bg); color: #1c1c1e; overflow-x: hidden; }
-    body.modal-open { overflow: hidden; } /* Evita scroll al abrir modal */
+    body.modal-open { overflow: hidden; } /* Bloquea el fondo para evitar el error de image_201119.png */
 
-    /* LAYOUT PRINCIPAL RESPONSIVO */
+    /* DISEÑO RESPONSIVO (Arreglo para image_2013fe.png) */
     .app-wrapper {
       display: grid;
       grid-template-columns: 1fr;
@@ -35,13 +35,13 @@
 
     @media (min-width: 1024px) {
       .app-wrapper {
-        grid-template-columns: 320px 1fr 320px; /* 3 Columnas perfectas */
+        grid-template-columns: 320px 1fr 320px; /* Tres columnas perfectas en PC */
         padding: 40px;
       }
-      .nav-bar { display: none !important; } /* Ocultar nav móvil en PC */
+      .nav-bar { display: none !important; }
     }
 
-    /* TARJETAS ESTILO APPLE */
+    /* TARJETAS */
     .card {
       background: white;
       border-radius: var(--radius-lg);
@@ -51,9 +51,7 @@
       margin-bottom: 20px;
     }
 
-    header h1 { font-size: 26px; font-weight: 800; margin-bottom: 15px; }
-
-    /* MODALES CORREGIDOS (Solución a image_5033c4.png) */
+    /* MODALES FIJOS (Solución para WhatsApp Image 2026-05-01 at 6.56.39 PM.jpeg) */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -78,14 +76,13 @@
       overflow-y: auto;
     }
 
-    /* FORMULARIOS EFICIENTES */
+    /* INPUTS */
     .input-group { margin-bottom: 16px; }
     .input-group label { display: block; font-size: 12px; font-weight: 700; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; }
     .input-group input, .input-group select {
       width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7;
-      background: var(--secondary); font-size: 16px; outline: none; transition: 0.2s;
+      background: var(--secondary); font-size: 16px; outline: none;
     }
-    .input-group input:focus { border-color: var(--accent); background: white; }
 
     .btn-main {
       width: 100%; padding: 18px; border-radius: 16px; border: none;
@@ -95,19 +92,7 @@
     .btn-accent { background: var(--accent); color: white; }
     .btn-ghost { background: none; color: #8e8e93; margin-top: 10px; }
 
-    /* BARRA DE PROGRESO MERCADERÍA */
-    .progress-container { background: var(--secondary); height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: 1s ease; }
-
-    /* MOVIMIENTOS */
-    .m-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 0; border-bottom: 1px solid #f2f2f7;
-    }
-    .m-info b { display: block; font-size: 15px; }
-    .m-info span { font-size: 12px; color: #8e8e93; }
-
-    /* FAB Y NAV MÓVIL (image_82a392.png) */
+    /* NAVEGACIÓN Y FAB */
     .nav-bar {
       position: fixed; bottom: 0; left: 0; width: 100%;
       background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
@@ -123,6 +108,10 @@
       border-radius: 30px; border: none; font-size: 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 900;
     }
+
+    /* BARRA PROGRESO */
+    .progress-container { background: var(--secondary); height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: 1s ease; }
   </style>
 </head>
 <body>
@@ -157,15 +146,13 @@
       </div>
     </div>
 
-    <!-- COLUMNA 2: LISTA (HISTORIAL) -->
+    <!-- COLUMNA 2: LISTA -->
     <div id="col-list">
       <h3 style="margin-bottom: 15px;">Movimientos Realizados</h3>
-      <div class="card" id="movement-list" style="min-height: 300px;">
-        <!-- Items aquí -->
-      </div>
+      <div class="card" id="movement-list" style="min-height: 300px;"></div>
     </div>
 
-    <!-- COLUMNA 3: PLANIFICADOR -->
+    <!-- COLUMNA 3: PLAN -->
     <div id="col-plan">
       <h3 style="margin-bottom: 15px;">Plan Mercadería 🛒</h3>
       <div class="card">
@@ -176,11 +163,7 @@
         <div class="progress-container"><div id="progress-bar" class="progress-fill"></div></div>
         <p id="budget-msg" style="font-size: 11px; color: #8e8e93;"></p>
       </div>
-
-      <div id="grocery-list">
-        <!-- Items de mercadería -->
-      </div>
-      
+      <div id="grocery-list"></div>
       <button class="btn-main" style="background: white; border: 1px dashed #d2d2d7; color: #8e8e93;" onclick="openModal('modal-grocery')">
         + Agregar al Plan
       </button>
@@ -188,7 +171,6 @@
 
   </div>
 
-  <!-- NAVEGACIÓN MÓVIL -->
   <nav class="nav-bar">
     <button class="nav-btn active" onclick="showSection('col-dash', this)"><span>📊</span>Dashboard</button>
     <button class="nav-btn" onclick="showSection('col-list', this)"><span>💸</span>Lista</button>
@@ -197,23 +179,27 @@
 
   <button class="fab" onclick="openModal('modal-add')">+</button>
 
-  <!-- MODAL 1: NUEVO GASTO -->
+  <!-- MODAL GASTOS (Actualizado con Arriendo, Ahorro, Tarjeta y Hormiga) -->
   <div class="modal-overlay" id="modal-add">
     <div class="modal-content">
-      <h2 style="margin-bottom: 20px;">Nuevo Gasto/Ingreso</h2>
+      <h2 style="margin-bottom: 20px;">Nuevo Registro</h2>
       <div class="input-group">
         <label>Categoría</label>
         <select id="m-cat">
-          <option value="Sueldo">💰 Sueldo</option>
+          <option value="Sueldo">💰 Sueldo (Ingreso)</option>
+          <option value="Arriendo">🏠 Arriendo</option>
           <option value="Supermercado">🛒 Supermercado</option>
           <option value="Cuentas">💡 Cuentas</option>
+          <option value="Tarjeta de Crédito">💳 Tarjeta de Crédito</option>
+          <option value="Gasto Hormiga">🐜 Gasto Hormiga</option>
           <option value="Salidas">🍻 Salidas</option>
+          <option value="Ahorro">🏦 Ahorro</option>
           <option value="Otro">➕ Otro</option>
         </select>
       </div>
       <div class="input-group">
         <label>Descripción</label>
-        <input type="text" id="m-desc" placeholder="Ej: Lider o Bono">
+        <input type="text" id="m-desc" placeholder="Ej: Pago arriendo Mayo">
       </div>
       <div class="input-group">
         <label>Monto</label>
@@ -224,7 +210,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: NUEVO PLAN -->
+  <!-- MODAL MERCADERÍA -->
   <div class="modal-overlay" id="modal-grocery">
     <div class="modal-content">
       <h2 style="margin-bottom: 20px;">Añadir al Plan 🛒</h2>
@@ -250,7 +236,6 @@
     let groceryPlan = [];
     let myChart;
 
-    // INICIALIZACIÓN
     async function init() {
       const sel = document.getElementById('month-selector');
       const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -275,17 +260,16 @@
       render();
     }
 
-    // MODALES
     function openModal(id) {
       document.getElementById(id).classList.add('active');
       document.body.classList.add('modal-open');
     }
+
     function closeModal() {
       document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
       document.body.classList.remove('modal-open');
     }
 
-    // GUARDADO
     async function saveMovement() {
       const cat = document.getElementById('m-cat').value;
       const amount = Number(document.getElementById('m-amount').value);
@@ -312,7 +296,6 @@
       fetchData();
     }
 
-    // RENDERIZADO
     function render() {
       const ing = movements.filter(m => m.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
       const gas = movements.filter(m => m.type === 'pago').reduce((a, b) => a + b.amount, 0);
@@ -321,24 +304,22 @@
       document.getElementById('stat-spent').textContent = `$${gas.toLocaleString('es-CL')}`;
       document.getElementById('stat-save').textContent = ing > 0 ? Math.round(((ing-gas)/ing)*100) + '%' : '0%';
 
-      // Lista movimientos
       document.getElementById('movement-list').innerHTML = movements.map(m => `
-        <div class="m-item">
-          <div class="m-info"><b>${m.description}</b><span>${m.date} • ${m.detail}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #f2f2f7;">
+          <div><b style="display:block;">${m.description}</b><span style="font-size:12px; color:#8e8e93;">${m.date} • ${m.detail}</span></div>
           <div style="font-weight:800; color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
             ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
           </div>
         </div>
       `).join('');
 
-      // Lógica Mercadería
       const totalPlan = groceryPlan.reduce((a,b) => a + b.estimated_price, 0);
       const totalReal = movements.filter(m => m.detail === 'Supermercado').reduce((a,b) => a + b.amount, 0);
       const perc = totalPlan > 0 ? Math.min((totalReal/totalPlan)*100, 100) : 0;
       
       document.getElementById('progress-bar').style.width = perc + '%';
       document.getElementById('label-diff').textContent = `$${totalPlan.toLocaleString('es-CL')}`;
-      document.getElementById('budget-msg').textContent = `Has gastado $${totalReal.toLocaleString('es-CL')} de un plan de $${totalPlan.toLocaleString('es-CL')}.`;
+      document.getElementById('budget-msg').textContent = `Gastado $${totalReal.toLocaleString('es-CL')} de un plan de $${totalPlan.toLocaleString('es-CL')}.`;
 
       document.getElementById('grocery-list').innerHTML = groceryPlan.map(g => `
         <div class="card" style="padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; font-size:14px;">
@@ -356,7 +337,7 @@
       if(myChart) myChart.destroy();
       myChart = new Chart(document.getElementById('pieChart'), {
         type: 'doughnut',
-        data: { labels: cats, datasets: [{ data, backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6'] }] },
+        data: { labels: cats, datasets: [{ data, backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6', '#af52de', '#ffcc00'] }] },
         options: { plugins: { legend: { display: false } }, cutout: '70%' }
       });
     }
