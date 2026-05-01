@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nico & Cris Cloud</title>
+  <title>Cuentas Cris&Nico ❤️</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -14,142 +14,190 @@
       --success: #34c759;
       --danger: #ff3b30;
       --bg: #f8f9fa;
-      --radius: 20px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
-    body { background-color: var(--bg); color: #1c1c1e; padding-bottom: 80px; }
-
-    .app-container { max-width: 500px; margin: 0 auto; padding: 20px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    /* Vistas */
-    .view { display: none; }
+    body { background-color: var(--bg); color: #1c1c1e; line-height: 1.5; }
+
+    /* Layout para Escritorio vs Móvil */
+    .main-wrapper { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 20px; 
+    }
+
+    @media (min-width: 900px) {
+      .main-wrapper { 
+        grid-template-columns: 350px 1fr; 
+        padding: 40px; 
+        height: 100vh;
+      }
+      .scroll-section { overflow-y: auto; padding-right: 10px; }
+      .nav-bar { display: none !important; } /* No mostrar nav inferior en PC */
+    }
+
+    /* Estilos de Vista */
+    .view { display: none; width: 100%; }
     .view.active { display: block; }
+    @media (min-width: 900px) {
+      .view { display: block !important; } /* En PC mostramos ambas secciones juntas */
+      #view-stats { order: 1; }
+      #view-list { order: 2; }
+    }
 
-    header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 22px; font-weight: 800; }
+    header { margin-bottom: 30px; }
+    header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
     
-    .month-select { border: none; background: white; padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .month-select { border: none; background: white; padding: 10px 15px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; }
 
-    /* Tarjetas */
-    .card { background: white; border-radius: var(--radius); padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-    .stat-label { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-size: 24px; font-weight: 800; margin-top: 5px; }
+    /* Tarjetas de Indicadores */
+    .card { background: white; border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+    .mini-card { background: var(--secondary); padding: 15px; border-radius: var(--radius-md); text-align: left; }
+    .mini-card span { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; display: block; }
+    .mini-card div { font-size: 16px; font-weight: 800; margin-top: 5px; }
 
     /* Lista de Movimientos */
-    .movement-item { padding: 15px 0; border-bottom: 1px solid #f2f2f7; display: flex; justify-content: space-between; align-items: center; }
+    .movement-item { 
+      padding: 16px; 
+      background: #fff;
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      transition: transform 0.2s;
+    }
+    .movement-item:active { transform: scale(0.98); }
     .m-info { display: flex; flex-direction: column; }
-    .m-name { font-weight: 600; font-size: 15px; }
-    .m-date { font-size: 11px; color: #8e8e93; margin-top: 2px; }
-    .m-amount { font-weight: 700; font-size: 15px; }
+    .m-name { font-weight: 700; font-size: 16px; color: var(--primary); }
+    .m-date { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+    .m-right { text-align: right; }
+    .m-amount { font-weight: 800; font-size: 16px; display: block; }
+    .btn-del { color: #d2d2d7; background: none; border: none; font-size: 18px; margin-left: 10px; cursor: pointer; }
 
-    /* Navegación Inferior */
-    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(15px); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #e5e5e7; z-index: 1000; }
-    .nav-item { border: none; background: none; color: #8e8e93; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+    /* Navegación Móvil Inferior */
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; padding: 15px 0 30px; border-top: 1px solid #e5e5e7; z-index: 1000; }
+    .nav-item { border: none; background: none; color: #8e8e93; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; text-transform: uppercase; }
     .nav-item.active { color: var(--accent); }
-    .nav-icon { font-size: 20px; }
+    .nav-icon { font-size: 22px; }
 
-    /* Botón Flotante */
-    .fab { position: fixed; bottom: 85px; right: 20px; background: var(--primary); color: white; width: 56px; height: 56px; border-radius: 28px; border: none; font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 900; }
+    /* Botón Flotante (Móvil) */
+    .fab { position: fixed; bottom: 100px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 30px; border: none; font-size: 28px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 900; }
+    @media (min-width: 900px) { .fab { bottom: 40px; right: 40px; } }
 
     /* Modales */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: white; width: 90%; max-width: 400px; border-radius: 28px; padding: 25px; }
-    .input-group { margin-bottom: 15px; }
-    .input-group label { display: block; font-size: 12px; font-weight: 700; color: #8e8e93; margin-bottom: 5px; }
-    .input-group input, .input-group select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e5e7; background: var(--secondary); font-size: 15px; outline: none; }
+    .modal-content { background: white; width: 90%; max-width: 450px; border-radius: 28px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
     
-    .chart-container { position: relative; height: 250px; width: 100%; margin-top: 10px; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 700; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; }
+    .input-group input, .input-group select { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7; background: var(--secondary); font-size: 16px; outline: none; transition: 0.2s; }
+    .input-group input:focus { border-color: var(--accent); background: white; }
+    
+    .chart-container { position: relative; height: 220px; width: 100%; }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="main-wrapper">
     
-    <!-- VISTA 1: MOVIMIENTOS -->
-    <div id="view-list" class="view active">
+    <!-- SECCIÓN IZQUIERDA (DASHBOARD / INDICADORES) -->
+    <div id="view-stats" class="view active scroll-section">
       <header>
-        <h1>Mis Cuentas ☁️</h1>
-        <select id="month-selector" class="month-select" onchange="fetchData()"></select>
+        <h1>Cuentas Cris&Nico ❤️</h1>
+        <div style="margin-top:15px">
+          <select id="month-selector" class="month-select" onchange="fetchData()"></select>
+        </div>
       </header>
 
       <div class="card" style="background: var(--primary); color: white;">
-        <span class="stat-label" style="color: rgba(255,255,255,0.6)">Balance del Mes</span>
-        <div class="stat-value" id="total-balance">$0</div>
+        <span class="stat-label" style="opacity: 0.7; font-size: 12px; font-weight: 600;">Balance Neto</span>
+        <div class="stat-value" id="total-balance" style="font-size: 36px; font-weight: 800;">$0</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="mini-card"><span>Gastado</span><div id="stat-spent" style="color:var(--danger)">$0</div></div>
+        <div class="mini-card"><span>Ingresado</span><div id="stat-income" style="color:var(--success)">$0</div></div>
+        <div class="mini-card"><span>Día más caro</span><div id="stat-peak-day">--</div></div>
+        <div class="mini-card"><span>Tasa Ahorro</span><div id="stat-save-rate">0%</div></div>
+        <div class="mini-card"><span>Gasto Diario</span><div id="stat-daily-avg">$0</div></div>
+        <div class="mini-card"><span>Proyección</span><div id="stat-projection">$0</div></div>
       </div>
 
       <div class="card">
-        <div id="movement-list">Cargando...</div>
-      </div>
-    </div>
-
-    <!-- VISTA 2: INDICADORES -->
-    <div id="view-stats" class="view">
-      <header>
-        <h1>Estadísticas 📊</h1>
-      </header>
-
-      <div class="card">
-        <span class="stat-label">¿En qué gastamos más?</span>
+        <span class="mini-card" style="background:none; padding:0; margin-bottom:15px"><span>Distribución de Gastos</span></span>
         <div class="chart-container">
           <canvas id="pieChart"></canvas>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <span class="stat-label">Histórico (Ingresos vs Gastos)</span>
-        <div class="chart-container">
-          <canvas id="barChart"></canvas>
-        </div>
+    <!-- SECCIÓN DERECHA (HISTORIAL) -->
+    <div id="view-list" class="view scroll-section">
+      <header class="desktop-only">
+        <h2 style="font-weight: 800; font-size: 22px;">Historial de Movimientos</h2>
+      </header>
+      <div id="movement-list">
+        <p style="text-align:center; padding:50px; color:#8e8e93;">Cargando tus cuentas...</p>
       </div>
-
-      <div id="extra-stats"></div>
     </div>
 
   </div>
 
-  <!-- Botón Flotante para agregar -->
+  <!-- Botón Flotante -->
   <button class="fab" onclick="toggleModal('modal-add', true)">+</button>
 
-  <!-- Navegación -->
+  <!-- Navegación Móvil -->
   <nav class="nav-bar">
-    <button class="nav-item active" onclick="switchView('list', this)">
-      <span class="nav-icon">💸</span>
-      <span>Gastos</span>
+    <button class="nav-item active" onclick="switchView('stats', this)">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
     </button>
-    <button class="nav-item" onclick="switchView('stats', this)">
-      <span class="nav-icon">📈</span>
-      <span>Indicadores</span>
+    <button class="nav-item" onclick="switchView('list', this)">
+      <span class="nav-icon">💸</span>
+      <span>Lista</span>
     </button>
   </nav>
 
-  <!-- Modal: Agregar -->
+  <!-- Modal: Agregar Registro -->
   <div class="modal-overlay" id="modal-add">
     <div class="modal-content">
-      <h2 style="margin-bottom:20px">Nuevo Registro</h2>
+      <h2 style="margin-bottom:25px; font-weight: 800;">Nuevo Registro</h2>
+      
       <div class="input-group">
         <label>Categoría</label>
         <select id="main-category">
           <option value="Sueldo">💰 Sueldo (Ingreso)</option>
           <option value="Supermercado">🛒 Supermercado</option>
-          <option value="Arriendo">🏠 Arriendo</option>
-          <option value="Cuentas">💡 Cuentas (Luz, Agua, etc)</option>
+          <option value="Cuentas">💡 Cuentas / Servicios</option>
+          <option value="Arriendo">🏠 Arriendo / Hogar</option>
           <option value="Gasto Hormiga">🐜 Gasto Hormiga</option>
-          <option value="Otro">➕ Otro</option>
+          <option value="Salidas">🍻 Salidas / Diversión</option>
+          <option value="Otro">➕ Otro Gasto</option>
         </select>
       </div>
+
       <div class="input-group">
-        <label>Descripción corta</label>
-        <input type="text" id="main-desc" placeholder="Ej: Compra Lider">
+        <label>¿Qué es?</label>
+        <input type="text" id="main-desc" placeholder="Ej: Compra Feria o Bono">
       </div>
+
       <div class="input-group">
-        <label>Monto ($)</label>
+        <label>Monto</label>
         <input type="number" id="main-amount" placeholder="0" inputmode="numeric">
       </div>
-      <div style="display:flex; gap:10px; margin-top:20px">
-        <button class="btn-cancel" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--secondary)" onclick="toggleModal('modal-add', false)">Cancelar</button>
-        <button class="btn-save" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--primary); color:white" onclick="handleSave()">Guardar</button>
+
+      <div style="display:flex; gap:12px; margin-top:10px">
+        <button onclick="toggleModal('modal-add', false)" style="flex:1; padding:18px; border-radius:18px; border:none; background:var(--secondary); font-weight:700;">Cerrar</button>
+        <button onclick="handleSave()" style="flex:1; padding:18px; border-radius:18px; border:none; background:var(--primary); color:white; font-weight:700;">Guardar</button>
       </div>
     </div>
   </div>
@@ -157,29 +205,31 @@
   <!-- Modal: Confirmar Borrado -->
   <div class="modal-overlay" id="modal-delete">
     <div class="modal-content" style="text-align:center">
-      <h3>¿Borrar registro?</h3>
-      <p style="color:#8e8e93; margin:15px 0">Esta acción eliminará el dato de la nube permanentemente.</p>
-      <div style="display:flex; gap:10px">
-        <button class="btn-cancel" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--secondary)" onclick="toggleModal('modal-delete', false)">No, volver</button>
-        <button style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--danger); color:white" id="confirm-delete-btn">Sí, borrar</button>
+      <div style="font-size:40px; margin-bottom:10px">🗑️</div>
+      <h3 style="font-weight: 800; font-size: 20px;">¿Eliminar este dato?</h3>
+      <p style="color:#8e8e93; margin:15px 0; font-size: 15px;">Esta acción borrará el registro permanentemente de la nube.</p>
+      <div style="display:flex; gap:12px">
+        <button onclick="toggleModal('modal-delete', false)" style="flex:1; padding:18px; border-radius:18px; border:none; background:var(--secondary); font-weight:700;">Volver</button>
+        <button id="confirm-delete-btn" style="flex:1; padding:18px; border-radius:18px; border:none; background:var(--danger); color:white; font-weight:700;">Eliminar</button>
       </div>
     </div>
   </div>
 
   <script>
-    // TUS CREDENCIALES
+    // CREDENCIALES SUPABASE
     const SUPABASE_URL = 'https://kthwwocunuxzrhwgpgwn.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_LAS1lqLjChsBcOAXRR7c0A_JG0U-w6J';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let movements = [];
     let idToDelete = null;
-    let pieChart, barChart;
+    let pieChart;
 
     async function init() {
       const selector = document.getElementById('month-selector');
       const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
       const ahora = new Date();
+      
       for(let i = -3; i <= 3; i++) {
         let d = new Date(ahora.getFullYear(), ahora.getMonth() + i, 1);
         let label = `${meses[d.getMonth()]} ${d.getFullYear()}`;
@@ -201,8 +251,7 @@
 
       if (!error) { 
         movements = data; 
-        renderList();
-        updateCharts(); 
+        renderAll();
       }
     }
 
@@ -214,13 +263,16 @@
 
       if(!amount || amount <= 0) return;
 
+      const now = new Date();
+      const timestamp = now.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'}) + " " + now.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+
       const { error } = await supabaseClient.from('movements').insert([{
         description: desc,
         detail: cat, 
         amount: Number(amount),
         type: (cat === 'Sueldo' ? 'ingreso' : 'pago'),
         month: month,
-        date: new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})
+        date: timestamp
       }]);
 
       if(!error) {
@@ -231,58 +283,63 @@
       }
     }
 
-    function askDelete(id) {
-      idToDelete = id;
-      toggleModal('modal-delete', true);
-    }
-
-    document.getElementById('confirm-delete-btn').onclick = async () => {
-      await supabaseClient.from('movements').delete().eq('id', idToDelete);
-      toggleModal('modal-delete', false);
-      await fetchData();
-    };
-
-    function renderList() {
+    function renderAll() {
       const ing = movements.filter(m => m.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
       const gas = movements.filter(m => m.type === 'pago').reduce((a, b) => a + b.amount, 0);
-      
-      document.getElementById('total-balance').textContent = `$${(ing - gas).toLocaleString('es-CL')}`;
+      const bal = ing - gas;
 
-      const list = document.getElementById('movement-list');
-      if(movements.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:#8e8e93; padding:20px;">Sin movimientos este mes.</p>';
-        return;
+      // Actualizar Dashboard
+      document.getElementById('total-balance').textContent = `$${bal.toLocaleString('es-CL')}`;
+      document.getElementById('stat-spent').textContent = `$${gas.toLocaleString('es-CL')}`;
+      document.getElementById('stat-income').textContent = `$${ing.toLocaleString('es-CL')}`;
+      
+      // Cálculo Tasa de Ahorro
+      const saveRate = ing > 0 ? Math.round(((ing - gas) / ing) * 100) : 0;
+      document.getElementById('stat-save-rate').textContent = `${saveRate}%`;
+
+      // Cálculo Gasto Diario y Proyección
+      const diaActual = new Date().getDate();
+      const totalDiasMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+      const avg = Math.round(gas / diaActual);
+      document.getElementById('stat-daily-avg').textContent = `$${avg.toLocaleString('es-CL')}`;
+      document.getElementById('stat-projection').textContent = `$${(avg * totalDiasMes).toLocaleString('es-CL')}`;
+
+      // Encontrar día de más gasto
+      if(movements.length > 0) {
+        const gasByDay = {};
+        movements.filter(m => m.type === 'pago').forEach(m => {
+          const d = m.date.split(' ')[0];
+          gasByDay[d] = (gasByDay[d] || 0) + m.amount;
+        });
+        const peakDay = Object.keys(gasByDay).reduce((a, b) => gasByDay[a] > gasByDay[b] ? a : b, "--");
+        document.getElementById('stat-peak-day').textContent = peakDay;
       }
 
-      list.innerHTML = movements.map(m => `
-        <div class="movement-item">
-          <div class="m-info">
-            <span class="m-name">${m.description}</span>
-            <span class="m-date">🗓️ ${m.date} • ${m.detail}</span>
+      // Render Lista
+      const list = document.getElementById('movement-list');
+      if(movements.length === 0) {
+        list.innerHTML = '<div class="card" style="text-align:center; color:#8e8e93">No hay registros este mes ☁️</div>';
+      } else {
+        list.innerHTML = movements.map(m => `
+          <div class="movement-item">
+            <div class="m-info">
+              <span class="m-name">${m.description}</span>
+              <span class="m-date">📅 ${m.date} • ${m.detail}</span>
+            </div>
+            <div class="m-right" style="display:flex; align-items:center">
+              <span class="m-amount" style="color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
+                ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
+              </span>
+              <button class="btn-del" onclick="askDelete(${m.id})">✕</button>
+            </div>
           </div>
-          <div style="display:flex; align-items:center; gap:15px">
-            <span class="m-amount" style="color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
-              ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
-            </span>
-            <span style="color:#d2d2d7; cursor:pointer" onclick="askDelete(${m.id})">✕</span>
-          </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
+
+      updateCharts();
     }
 
-    function switchView(viewName, btn) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('view-' + viewName).classList.add('active');
-      btn.classList.add('active');
-      if(viewName === 'stats') updateCharts();
-    }
-
-    function toggleModal(id, show) { document.getElementById(id).classList.toggle('active', show); }
-
-    // --- LÓGICA DE GRÁFICOS ---
-    async function updateCharts() {
-      // 1. Gráfico de Torta (Gastos por Categoría)
+    function updateCharts() {
       const gastos = movements.filter(m => m.type === 'pago');
       const cats = [...new Set(gastos.map(m => m.detail))];
       const dataPie = cats.map(c => gastos.filter(m => m.detail === c).reduce((a,b) => a + b.amount, 0));
@@ -293,32 +350,37 @@
         type: 'doughnut',
         data: {
           labels: cats,
-          datasets: [{ data: dataPie, backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6', '#ff2d55'] }]
+          datasets: [{ 
+            data: dataPie, 
+            backgroundColor: ['#5856d6', '#ff9500', '#ff2d55', '#007aff', '#34c759', '#af52de'],
+            borderWidth: 0
+          }]
         },
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
-      });
-
-      // 2. Gráfico de Histórico (Últimos 4 meses)
-      const { data: allData } = await supabaseClient.from('movements').select('month, type, amount');
-      const ultimosMeses = [...new Set(allData.map(d => d.month))].slice(-4);
-      
-      const ingresosMes = ultimosMeses.map(mes => allData.filter(d => d.month === mes && d.type === 'ingreso').reduce((a,b) => a + b.amount, 0));
-      const gastosMes = ultimosMeses.map(mes => allData.filter(d => d.month === mes && d.type === 'pago').reduce((a,b) => a + b.amount, 0));
-
-      if(barChart) barChart.destroy();
-      const ctxBar = document.getElementById('barChart').getContext('2d');
-      barChart = new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-          labels: ultimosMeses.map(m => m.split(' ')[0]),
-          datasets: [
-            { label: 'Ingresos', data: ingresosMes, backgroundColor: '#34c759' },
-            { label: 'Gastos', data: gastosMes, backgroundColor: '#ff3b30' }
-          ]
-        },
-        options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { display: false } } } }
+        options: { 
+          maintainAspectRatio: false, 
+          cutout: '70%',
+          plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } } 
+        }
       });
     }
+
+    function askDelete(id) { idToDelete = id; toggleModal('modal-delete', true); }
+    document.getElementById('confirm-delete-btn').onclick = async () => {
+      await supabaseClient.from('movements').delete().eq('id', idToDelete);
+      toggleModal('modal-delete', false);
+      await fetchData();
+    };
+
+    function switchView(viewName, btn) {
+      if(window.innerWidth < 900) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('view-' + viewName).classList.add('active');
+        btn.classList.add('active');
+      }
+    }
+
+    function toggleModal(id, show) { document.getElementById(id).classList.toggle('active', show); }
 
     init();
   </script>
