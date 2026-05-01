@@ -44,20 +44,29 @@
 
     .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 18px; border-radius: var(--radius); font-size: 16px; font-weight: 700; margin-top: 20px; cursor: pointer; }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    /* Estilo Base Modales */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: white; width: 92%; max-width: 400px; border-radius: 24px; padding: 24px; }
+    .modal-content { background: white; width: 90%; max-width: 380px; border-radius: 28px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; }
     
-    .input-group { margin-bottom: 14px; }
-    .input-group label { display: block; font-size: 12px; font-weight: 600; color: #8e8e93; margin-bottom: 6px; }
-    .input-group select, .input-group input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e5e7; background: var(--secondary); font-size: 15px; outline: none; }
+    /* Formulario */
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; font-size: 12px; font-weight: 600; color: #8e8e93; margin-bottom: 6px; padding-left: 4px; }
+    .input-group select, .input-group input { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #e5e5e7; background: var(--secondary); font-size: 15px; outline: none; }
     
-    .sub-panel { background: #f9f9fb; padding: 12px; border-radius: 12px; border: 1px dashed #d2d2d7; margin-top: 10px; display: none; }
-    .sub-panel input { width: 100%; margin-bottom: 8px; }
+    .sub-panel { background: #f9f9fb; padding: 12px; border-radius: 14px; border: 1px dashed #d2d2d7; margin-bottom: 16px; display: none; }
+    .sub-panel input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e5e5e7; background: white; font-size: 14px; margin-bottom: 8px; outline: none; }
+    .sub-panel input:last-child { margin-bottom: 0; }
 
-    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
-    .btn-cancel { padding: 14px; border: none; border-radius: 12px; font-weight: 600; background: #f2f2f7; }
-    .btn-save { padding: 14px; border: none; border-radius: 12px; font-weight: 600; background: var(--primary); color: white; }
+    /* Botones Modales */
+    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    .btn-cancel { padding: 15px; border: none; border-radius: 14px; font-weight: 600; background: var(--secondary); color: #1c1c1e; cursor: pointer; }
+    .btn-save { padding: 15px; border: none; border-radius: 14px; font-weight: 600; background: var(--primary); color: white; cursor: pointer; }
+    .btn-danger { background: var(--danger); color: white; }
+
+    /* Texto Borrado */
+    .modal-content h3 { font-size: 18px; margin-bottom: 10px; }
+    .modal-content p { color: #8e8e93; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -69,61 +78,70 @@
     </header>
 
     <div class="summary-grid" id="summary"></div>
-    <div class="list-container" id="movement-list">Cargando...</div>
-    <button class="btn-add" onclick="toggleModal(true)">+ Nuevo Movimiento</button>
+    <div class="list-container" id="movement-list">Conectando...</div>
+    <button class="btn-add" onclick="toggleModal('modal-add', true)">+ Nuevo Movimiento</button>
   </div>
 
-  <!-- Ventana de Ingreso -->
-  <div class="modal-overlay" id="modal-overlay">
+  <!-- Modal: Agregar Gasto -->
+  <div class="modal-overlay" id="modal-add">
     <div class="modal-content">
       <div class="input-group">
         <label>Categoría</label>
         <select id="main-category" onchange="handleCategoryChange(this.value)">
           <option value="Sueldo">💰 Sueldo</option>
           <option value="Arriendo">🏠 Arriendo</option>
-          <option value="Supermercado">🛒 Supermercado</option>
+          <option value="Supermercado" selected>🛒 Supermercado</option>
           <option value="Cuentas">💡 Cuentas</option>
           <option value="Gasto Hormiga">🐜 Gasto Hormiga</option>
           <option value="Otro">➕ Otro...</option>
         </select>
       </div>
 
-      <div id="panel-super" class="sub-panel">
+      <div id="panel-super" class="sub-panel" style="display:block;">
         <input type="text" id="sp-prod" placeholder="¿Qué compraste?">
         <input type="text" id="sp-lugar" placeholder="¿Dónde? (Lider, Jumbo...)">
       </div>
 
-      <div id="panel-otro" class="sub-panel" style="display:block;">
-        <input type="text" id="ot-desc" placeholder="Descripción">
+      <div id="panel-otro" class="sub-panel">
+        <input type="text" id="ot-desc" placeholder="Descripción del gasto">
       </div>
 
-      <div class="input-group" style="margin-top:15px;">
+      <div class="input-group">
         <label>Monto ($)</label>
         <input type="number" id="main-amount" placeholder="0" inputmode="numeric">
       </div>
 
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
-        <button class="btn-save" onclick="handleSave()">Guardar en Nube</button>
+        <button class="btn-cancel" onclick="toggleModal('modal-add', false)">Cerrar</button>
+        <button class="btn-save" onclick="handleSave()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmar Borrado -->
+  <div class="modal-overlay" id="modal-delete">
+    <div class="modal-content">
+      <h3>¿Borrar registro?</h3>
+      <p>Esta acción no se puede deshacer. El dato se eliminará de la nube de forma permanente.</p>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="toggleModal('modal-delete', false)">Cancelar</button>
+        <button class="btn-save btn-danger" id="confirm-delete-btn">Borrar Ahora</button>
       </div>
     </div>
   </div>
 
   <script>
-    // CONFIGURACIÓN DE TU BASE DE DATOS
     const SUPABASE_URL = 'https://kthwwocunuxzrhwgpgwn.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_LAS1lqLjChsBcOAXRR7c0A_JG0U-w6J';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let movements = [];
+    let idToDelete = null;
 
-    // Iniciar aplicación
     async function init() {
       const selector = document.getElementById('month-selector');
       const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
       const ahora = new Date();
-      
-      // Crear opciones de meses
       for(let i = -2; i <= 4; i++) {
         let d = new Date(ahora.getFullYear(), ahora.getMonth() + i, 1);
         let label = `${meses[d.getMonth()]} ${d.getFullYear()}`;
@@ -135,7 +153,6 @@
       await fetchData();
     }
 
-    // Leer datos de Supabase
     async function fetchData() {
       const selectedMonth = document.getElementById('month-selector').value;
       const { data, error } = await supabaseClient
@@ -144,26 +161,18 @@
         .eq('month', selectedMonth)
         .order('id', { ascending: false });
 
-      if (error) {
-          console.error("Error leyendo datos:", error);
-          document.getElementById('movement-list').innerHTML = "Error al conectar.";
-      } else {
-        movements = data;
-        render();
-      }
+      if (!error) { movements = data; render(); }
     }
 
-    // Guardar en Supabase
     async function handleSave() {
       const cat = document.getElementById('main-category').value;
       const amount = document.getElementById('main-amount').value;
       const month = document.getElementById('month-selector').value;
 
-      if(!amount || amount <= 0) return alert("Ingresa un monto válido");
+      if(!amount || amount <= 0) return;
 
       let desc = cat;
       let detail = "";
-
       if(cat === 'Supermercado') {
         desc = document.getElementById('sp-prod').value || "Supermercado";
         detail = document.getElementById('sp-lugar').value;
@@ -171,40 +180,34 @@
         desc = document.getElementById('ot-desc').value || cat;
       }
 
-      const newEntry = {
-        description: desc,
-        detail: detail,
-        amount: Number(amount),
+      const { error } = await supabaseClient.from('movements').insert([{
+        description: desc, detail: detail, amount: Number(amount),
         type: (cat === 'Sueldo' ? 'ingreso' : 'pago'),
-        month: month,
-        date: new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})
-      };
+        month: month, date: new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})
+      }]);
 
-      const { error } = await supabaseClient.from('movements').insert([newEntry]);
-
-      if(error) {
-          alert("Error al guardar: " + error.message);
-      } else {
-        toggleModal(false);
-        // Limpiar inputs
-        document.getElementById('main-amount').value = '';
-        document.getElementById('sp-prod').value = '';
-        document.getElementById('sp-lugar').value = '';
-        document.getElementById('ot-desc').value = '';
+      if(!error) {
+        toggleModal('modal-add', false);
+        resetInputs();
         await fetchData();
       }
     }
 
-    // Borrar de Supabase
-    async function deleteItem(id) {
-      if(confirm("¿Borrar este registro para siempre?")) {
-        const { error } = await supabaseClient.from('movements').delete().eq('id', id);
-        if(error) alert("No se pudo borrar");
-        else await fetchData();
-      }
+    // Nueva función de borrado con Modal
+    function askDelete(id) {
+      idToDelete = id;
+      toggleModal('modal-delete', true);
     }
 
-    // Dibujar la interfaz
+    document.getElementById('confirm-delete-btn').onclick = async () => {
+      if(idToDelete) {
+        await supabaseClient.from('movements').delete().eq('id', idToDelete);
+        idToDelete = null;
+        toggleModal('modal-delete', false);
+        await fetchData();
+      }
+    };
+
     function render() {
       const ing = movements.filter(m => m.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
       const gas = movements.filter(m => m.type === 'pago').reduce((a, b) => a + b.amount, 0);
@@ -216,8 +219,8 @@
 
       const list = document.getElementById('movement-list');
       if(movements.length === 0) {
-          list.innerHTML = `<p style="text-align:center; color:#8e8e93; margin-top:20px;">No hay movimientos este mes.</p>`;
-          return;
+        list.innerHTML = '<p style="text-align:center; color:#8e8e93; margin-top:40px;">Sin movimientos este mes.</p>';
+        return;
       }
 
       list.innerHTML = movements.map(m => `
@@ -230,20 +233,26 @@
             <span class="m-amount" style="color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
               ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
             </span>
-            <button class="btn-delete" onclick="deleteItem(${m.id})">✕</button>
+            <button class="btn-delete" onclick="askDelete(${m.id})">✕</button>
           </div>
         </div>
       `).join('');
     }
 
-    function toggleModal(s) { document.getElementById('modal-overlay').classList.toggle('active', s); }
+    function toggleModal(id, s) { document.getElementById(id).classList.toggle('active', s); }
     
     function handleCategoryChange(v) {
       document.getElementById('panel-super').style.display = (v === 'Supermercado' ? 'block' : 'none');
       document.getElementById('panel-otro').style.display = (v === 'Supermercado' ? 'none' : 'block');
     }
 
-    // Arrancar
+    function resetInputs() {
+      document.getElementById('main-amount').value = '';
+      document.getElementById('sp-prod').value = '';
+      document.getElementById('sp-lugar').value = '';
+      document.getElementById('ot-desc').value = '';
+    }
+
     init();
   </script>
 </body>
