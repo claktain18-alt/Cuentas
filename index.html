@@ -20,9 +20,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
     
     body { background-color: var(--bg); color: #1c1c1e; overflow-x: hidden; }
-    body.modal-open { overflow: hidden; } /* Bloquea el fondo para evitar el error de image_201119.png */
+    body.modal-open { overflow: hidden; }
 
-    /* DISEÑO RESPONSIVO (Arreglo para image_2013fe.png) */
     .app-wrapper {
       display: grid;
       grid-template-columns: 1fr;
@@ -35,13 +34,12 @@
 
     @media (min-width: 1024px) {
       .app-wrapper {
-        grid-template-columns: 320px 1fr 320px; /* Tres columnas perfectas en PC */
+        grid-template-columns: 320px 1fr 320px;
         padding: 40px;
       }
       .nav-bar { display: none !important; }
     }
 
-    /* TARJETAS */
     .card {
       background: white;
       border-radius: var(--radius-lg);
@@ -51,7 +49,6 @@
       margin-bottom: 20px;
     }
 
-    /* MODALES FIJOS (Solución para WhatsApp Image 2026-05-01 at 6.56.39 PM.jpeg) */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -76,7 +73,6 @@
       overflow-y: auto;
     }
 
-    /* INPUTS */
     .input-group { margin-bottom: 16px; }
     .input-group label { display: block; font-size: 12px; font-weight: 700; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; }
     .input-group input, .input-group select {
@@ -92,7 +88,13 @@
     .btn-accent { background: var(--accent); color: white; }
     .btn-ghost { background: none; color: #8e8e93; margin-top: 10px; }
 
-    /* NAVEGACIÓN Y FAB */
+    /* Botón eliminar */
+    .btn-delete {
+      background: none; border: none; color: #d1d1d6; 
+      cursor: pointer; padding: 5px; transition: 0.2s;
+    }
+    .btn-delete:hover { color: var(--danger); }
+
     .nav-bar {
       position: fixed; bottom: 0; left: 0; width: 100%;
       background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
@@ -109,7 +111,6 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 900;
     }
 
-    /* BARRA PROGRESO */
     .progress-container { background: var(--secondary); height: 10px; border-radius: 5px; margin: 15px 0; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: 1s ease; }
   </style>
@@ -118,7 +119,6 @@
 
   <div class="app-wrapper">
     
-    <!-- COLUMNA 1: DASHBOARD -->
     <div id="col-dash">
       <header>
         <h1>Cris&Nico ❤️</h1>
@@ -146,13 +146,11 @@
       </div>
     </div>
 
-    <!-- COLUMNA 2: LISTA -->
     <div id="col-list">
       <h3 style="margin-bottom: 15px;">Movimientos Realizados</h3>
       <div class="card" id="movement-list" style="min-height: 300px;"></div>
     </div>
 
-    <!-- COLUMNA 3: PLAN -->
     <div id="col-plan">
       <h3 style="margin-bottom: 15px;">Plan Mercadería 🛒</h3>
       <div class="card">
@@ -179,7 +177,6 @@
 
   <button class="fab" onclick="openModal('modal-add')">+</button>
 
-  <!-- MODAL GASTOS (Actualizado con Arriendo, Ahorro, Tarjeta y Hormiga) -->
   <div class="modal-overlay" id="modal-add">
     <div class="modal-content">
       <h2 style="margin-bottom: 20px;">Nuevo Registro</h2>
@@ -210,7 +207,6 @@
     </div>
   </div>
 
-  <!-- MODAL MERCADERÍA -->
   <div class="modal-overlay" id="modal-grocery">
     <div class="modal-content">
       <h2 style="margin-bottom: 20px;">Añadir al Plan 🛒</h2>
@@ -296,6 +292,22 @@
       fetchData();
     }
 
+    // NUEVA FUNCIÓN: ELIMINAR MOVIMIENTO
+    async function deleteMovement(id) {
+      if(confirm('¿Seguro que quieres borrar este registro?')) {
+        await supabaseClient.from('movements').delete().eq('id', id);
+        fetchData();
+      }
+    }
+
+    // NUEVA FUNCIÓN: ELIMINAR ITEM PLAN
+    async function deleteGrocery(id) {
+      if(confirm('¿Borrar de la lista de compras?')) {
+        await supabaseClient.from('grocery_plan').delete().eq('id', id);
+        fetchData();
+      }
+    }
+
     function render() {
       const ing = movements.filter(m => m.type === 'ingreso').reduce((a, b) => a + b.amount, 0);
       const gas = movements.filter(m => m.type === 'pago').reduce((a, b) => a + b.amount, 0);
@@ -305,10 +317,16 @@
       document.getElementById('stat-save').textContent = ing > 0 ? Math.round(((ing-gas)/ing)*100) + '%' : '0%';
 
       document.getElementById('movement-list').innerHTML = movements.map(m => `
-        <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #f2f2f7;">
-          <div><b style="display:block;">${m.description}</b><span style="font-size:12px; color:#8e8e93;">${m.date} • ${m.detail}</span></div>
-          <div style="font-weight:800; color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
-            ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px solid #f2f2f7;">
+          <div style="flex:1;">
+            <b style="display:block;">${m.description}</b>
+            <span style="font-size:12px; color:#8e8e93;">${m.date} • ${m.detail}</span>
+          </div>
+          <div style="text-align:right; display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:800; color:${m.type==='ingreso'?'var(--success)':'var(--primary)'}">
+              ${m.type==='ingreso'?'+':'-'}$${m.amount.toLocaleString('es-CL')}
+            </span>
+            <button class="btn-delete" onclick="deleteMovement(${m.id})">🗑️</button>
           </div>
         </div>
       `).join('');
@@ -322,8 +340,12 @@
       document.getElementById('budget-msg').textContent = `Gastado $${totalReal.toLocaleString('es-CL')} de un plan de $${totalPlan.toLocaleString('es-CL')}.`;
 
       document.getElementById('grocery-list').innerHTML = groceryPlan.map(g => `
-        <div class="card" style="padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; font-size:14px;">
-          <span>${g.item_name}</span><b>$${g.estimated_price.toLocaleString('es-CL')}</b>
+        <div class="card" style="padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:14px;">
+          <span>${g.item_name}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <b>$${g.estimated_price.toLocaleString('es-CL')}</b>
+            <button class="btn-delete" onclick="deleteGrocery(${g.id})" style="font-size:12px;">🗑️</button>
+          </div>
         </div>
       `).join('');
 
